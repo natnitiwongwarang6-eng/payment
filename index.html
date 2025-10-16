@@ -34,7 +34,7 @@ const { useState, useEffect } = React;
 
 // Fixed QR Code URL - แก้ไขตรงนี้เพื่อใส่ QR Code ของคุณ
 // ตัวอย่าง base64 data URL (เปลี่ยนเป็นของจริงได้)
-const FIXED_QR_CODE = 'qr.png';
+
 // Note under QR (ลบออก ถ้าไม่ต้องการหมายเหตุใต้ QR)
 // Accounts to display under QR. Replace `logo` and `bankLogo` with real data URLs or file paths
 const ACCOUNTS = [
@@ -527,7 +527,7 @@ const OrderCard = ({ items, orderNumber }) => {
           {/* Show QR image; if it fails, show a helpful fallback message */}
           {!qrError ? (
             <img
-              src="/asset/qr.png"
+              src="qr.png"
               alt="QR Code"
               onError={() => setQrError(true)}
               className="mx-auto mt-2 w-48 h-48 object-contain"
@@ -544,7 +544,7 @@ const OrderCard = ({ items, orderNumber }) => {
               {ACCOUNTS.map((acc, idx) => (
                 <div key={idx} className="p-2 bg-gray-50 rounded text-sm text-gray-800 border border-red-200">
                   <div className="flex items-center gap-2">
-                    <img src="C:\Users\This PC\Downloads\New folder\asset\OIP (1).webp" alt="acc logo" className="w-6 h-6" />
+                    <img src={logo.logo} alt="acc logo" className="w-6 h-6" />
                     <span className="font-bold">{acc.accountName}</span>
                     <span className="text-xs text-gray-500">/</span>
                     <img src={acc.bankLogo} alt="bank logo" className="w-6 h-6" />
