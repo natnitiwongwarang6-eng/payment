@@ -34,21 +34,21 @@ const { useState, useEffect } = React;
 
 // Fixed QR Code URL - แก้ไขตรงนี้เพื่อใส่ QR Code ของคุณ
 // ตัวอย่าง base64 data URL (เปลี่ยนเป็นของจริงได้)
-const FIXED_QR_CODE = 'asset/qr.png';
+const FIXED_QR_CODE = 'qr.png';
 // Note under QR (ลบออก ถ้าไม่ต้องการหมายเหตุใต้ QR)
 // Accounts to display under QR. Replace `logo` and `bankLogo` with real data URLs or file paths
 const ACCOUNTS = [
   {
-    logo : 'asset/bank.webp',
+    logo : 'bank.webp',
     accountName: 'ຄິດທະພອນ ພູມມະໄຊທອງ ຫລື ອາດຈະເປັນ OneCash...', // สมชาย ใจดี
-    bankLogo: 'asset/unnamed.png',
+    bankLogo: 'unnamed.png',
     bankName: 'ການຄ້າ (BCEL One)',
     accountNumber: 'ເລກບັນຊີ : 0101237636072'
   },
   {
-    logo: 'asset/bank.webp',
+    logo: 'bank.webp',
     accountName: 'ສົມພັນ ວັນນະວົງ', // สมชาย ใจดี
-    bankLogo: 'asset/OIP.webp',
+    bankLogo: 'OIP.webp',
     bankName: 'ຢູມັນນີ້ (Umoney)',
     accountNumber: '* ໂຕຄິວອາ '
   }
