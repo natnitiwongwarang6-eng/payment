@@ -32,11 +32,21 @@ body {
 <script type="text/babel">
 const { useState, useEffect } = React;
 
-// Fixed QR Code URL - แก้ไขตรงนี้เพื่อใส่ QR Code ของคุณ
-// ตัวอย่าง base64 data URL (เปลี่ยนเป็นของจริงได้)
 
-// Note under QR (ลบออก ถ้าไม่ต้องการหมายเหตุใต้ QR)
-// Accounts to display under QR. Replace `logo` and `bankLogo` with real data URLs or file paths
+// ລະຫັດ (SHA-256)
+const encryptPassword = async (password) => {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hash))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+};
+
+// ລະຫັດ
+const HASHED_PASSWORD = 'a745d6148f2aca1dd8440e1c45482dc7f3ed14a7749ff1ad7e6fbf160608ecac'; // hash ของ "1234"
+
+// ບ່ອນຕັ້ງຄ່າບັນຊີ
 const ACCOUNTS = [
   {
     logo : 'bank.webp',
@@ -47,14 +57,15 @@ const ACCOUNTS = [
   },
   {
     logo: 'bank.webp',
-    accountName: 'ສົມພັນ ວັນນະວົງ', // สมชาย ใจดี
+    accountName: 'ສົມພັນ ວັນນະວົງ',
     bankLogo: 'OIP.webp',
     bankName: 'ຢູມັນນີ້ (Umoney)',
     accountNumber: '* ໂຕຄິວອາ '
   }
 ];
 
-// --- Encode/Decode Unicode Base64 URL-safe ---
+
+// ฟังก์ชันแปลงข้อมูลเป็น base64 (สำหรับสร้างลิงก์)
 const encodeData = (data) => {
   const json = JSON.stringify(data);
   const bytes = new TextEncoder().encode(json);
@@ -63,6 +74,7 @@ const encodeData = (data) => {
   return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 };
 
+// ฟังก์ชันถอดรหัส base64 กลับเป็นข้อมูลเดิม
 const decodeData = (encodedData) => {
   try {
     let base64 = encodedData.replace(/-/g, '+').replace(/_/g, '/');
@@ -78,9 +90,10 @@ const decodeData = (encodedData) => {
 
 const formatPrice = (price) => new Intl.NumberFormat('en-US').format(price);
 
-// Generate unique order number
+
+// สร้างเลขที่ใบสั่งแบบสุ่ม
 const generateOrderNumber = () => {
-  const randomNum = Math.floor(Math.random() * 90000) + 10000; // Generate 5-digit number (10000-99999)
+  const randomNum = Math.floor(Math.random() * 90000) + 10000; // สุ่มเลข 5 หลัก
   return `Natniti${randomNum}`;
 };
 
@@ -107,22 +120,14 @@ const OrderForm = ({ items, setItems, orderNumber, generateNewOrderNumber }) => 
       return JSON.parse(stored);
     }
     return [
-      { id: 1, name: 'ເບຍລາວ', price: 12000 },
-      { id: 2, name: 'ນ້ຳດື່ມ', price: 3000 },
-      { id: 3, name: 'ມາມ່າ', price: 2500 },
-      { id: 4, name: 'ເຂົ້າຈີ່', price: 15000 },
-      { id: 5, name: 'ກາເຟ', price: 8000 },
-      { id: 6, name: 'ນົມສົດ', price: 6000 },
-      { id: 7, name: 'ຂະໜົມປັງ', price: 4000 },
-      { id: 8, name: 'ໄຂ່ໄກ່', price: 1500 },
-      { id: 9, name: 'ນ້ຳຕານ', price: 5000 },
-      { id: 10, name: 'ບິສກິດ', price: 3500 }
+    
     ];
   };
 
   const [predefinedProducts, setPredefinedProducts] = useState(getStoredProducts);
 
-  // Save products to localStorage
+
+  // ฟังก์ชันบันทึกสินค้าลง localStorage
   const saveProducts = (products) => {
     localStorage.setItem('quickProducts', JSON.stringify(products));
     setPredefinedProducts(products);
@@ -256,20 +261,20 @@ const OrderForm = ({ items, setItems, orderNumber, generateNewOrderNumber }) => 
             onClick={() => setShowSuggestions(!showSuggestions)}
             className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors"
           >
-            {showSuggestions ? 'ປິດລາຍການສິນຄ້າ' : 'ເລືອກສິນຄ້າດ່ວນ'}
+            {showSuggestions ? 'ປິດລາຍການສິນຄ້າ' : 'ເລືອກສິນຄ້າທີ່ກຳນົດໄວ້'}
           </button>
           <button
             onClick={() => setShowProductManager(!showProductManager)}
             className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg transition-colors"
           >
-            {showProductManager ? 'ປິດການຈັດການສິນຄ້າ' : 'ຈັດການສິນຄ້າດ່ວນ'}
+            {showProductManager ? 'ປິດການຈັດການສິນຄ້າ' : 'ຈັດການສິນຄ້າທີ່ກຳນົດໄວ້'}
           </button>
         </div>
 
         {/* Product Manager */}
         {showProductManager && (
           <div className="bg-gray-50 p-4 rounded-lg mb-4">
-            <h4 className="font-semibold text-gray-700 mb-3">ຈັດການສິນຄ້າດ່ວນ</h4>
+            <h4 className="font-semibold text-gray-700 mb-3">ຈັດການສິນຄ້າທີ່ກຳນົດໄວ້</h4>
             
             {/* Add/Edit Product Form */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
@@ -503,7 +508,7 @@ const OrderForm = ({ items, setItems, orderNumber, generateNewOrderNumber }) => 
   );
 };
 
-// Order Card Component - Receipt Style
+// ส่วนแสดงใบเสร็จ
 const OrderCard = ({ items, orderNumber }) => {
   const total = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const currentDate = new Date().toLocaleDateString('lo-LA');
@@ -537,8 +542,6 @@ const OrderCard = ({ items, orderNumber }) => {
               รูป QR ไม่แสดง: กรุณาวางไฟล์ <span className="font-semibold">qr.png</span> ในโฟลเดอร์เดียวกัน หรือแก้ไขตัวแปร <code>FIXED_QR_CODE</code> ให้เป็น URL/พาธที่ถูกต้อง
             </div>
           )}
-          {/* Note / textarea under QR for additional info (printed too) */}
-          {/* (ลบหมายเหตุใต้ QR ออก เหลือเฉพาะข้อมูลบัญชี) */}
           {/* Account info under QR (read-only, set in code) */}
           <div className="mt-3 space-y-2">
               {ACCOUNTS.map((acc, idx) => (
@@ -608,24 +611,81 @@ const OrderCard = ({ items, orderNumber }) => {
       )}
 
       {/* Footer */}
-      {/* (ไม่มีหมายเหตุด้านล่างรายการ) */}
-      {/* (ลบบล็อกข้อมูลบัญชีด้านล่างออก เหลือเฉพาะใต้ QR) */}
+
 
       <div className="mt-4 text-center border-t-2 border-dashed border-gray-300 pt-3">
         <p className="text-xs text-gray-500 mb-2">ຂອບໃຈທີ່ໃຊ້ບໍລິການ</p>
         <div className="text-xs text-gray-400">
-          <p>*** ກະລຸນາເກັບໃບເສັບໄວ້ ***</p>
+          <p>*** Natniti Store ***</p>
         </div>
       </div>
     </div>
   );
 };
 
-// Main App
+// ส่วนหลักของแอป
 const App = () => {
   const [items, setItems] = useState([]);
   const [activeTab, setActiveTab] = useState('form');
   const [orderNumber, setOrderNumber] = useState(() => generateOrderNumber());
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(true);
+
+  // ตรวจสอบสถานะการ login เมื่อโหลดหน้า
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      const storedLoginStatus = localStorage.getItem('isLoggedIn');
+      const storedLoginHash = localStorage.getItem('loginHash');
+      
+      if (storedLoginStatus === 'true' && storedLoginHash) {
+        // ตรวจสอบว่า login ไม่เกิน 24 ชั่วโมง
+        const currentTime = Date.now();
+        const loginTime = parseInt(storedLoginHash, 16);
+        const hoursSinceLogin = (currentTime - loginTime) / (1000 * 60 * 60);
+        
+        if (hoursSinceLogin < 24) {
+          setIsLoggedIn(true);
+          setShowLoginModal(false);
+        } else {
+          // ถ้าเกิน 24 ชั่วโมง ให้ logout
+          localStorage.removeItem('isLoggedIn');
+          localStorage.removeItem('loginHash');
+          setIsLoggedIn(false);
+          setShowLoginModal(true);
+        }
+      } else {
+        setIsLoggedIn(false);
+        setShowLoginModal(!isViewOnly); // แสดง login modal เฉพาะเมื่อไม่ใช่โหมดดูอย่างเดียว
+      }
+    };
+    
+    checkLoginStatus();
+  }, [isViewOnly]);
+  const [isViewOnly, setIsViewOnly] = useState(false);
+  
+  const handleLogin = async (password) => {
+    try {
+      // เข้ารหัส password ที่ผู้ใช้ป้อน
+      const hashedInput = await encryptPassword(password);
+      
+      // เปรียบเทียบกับ password ที่เข้ารหัสไว้
+      if (hashedInput === HASHED_PASSWORD) {
+        setIsLoggedIn(true);
+        setShowLoginModal(false);
+        localStorage.setItem('isLoggedIn', 'true');
+        
+        // เพิ่มการเข้ารหัสเวลาที่ login สำเร็จ
+        const loginTime = Date.now();
+        const encryptedTime = await encryptPassword(loginTime.toString());
+        localStorage.setItem('loginHash', encryptedTime);
+      } else {
+        alert('รหัสผ่านไม่ถูกต้อง');
+      }
+    } catch (error) {
+      console.error('เกิดข้อผิดพลาดในการเข้าสู่ระบบ:', error);
+      alert('เกิดข้อผิดพลาดในการเข้าสู่ระบบ กรุณาลองใหม่อีกครั้ง');
+    }
+  };
 
   const generateNewOrderNumber = () => {
     setOrderNumber(generateOrderNumber());
@@ -635,12 +695,20 @@ const App = () => {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const data = urlParams.get('data');
+    const viewMode = urlParams.get('view');
+    
     if (data) {
       const decoded = decodeData(data);
       if (decoded) {
         setItems(decoded.items || []);
         setOrderNumber(decoded.orderNumber || generateOrderNumber());
         setActiveTab('card');
+        
+        // If view=true, set to view-only mode
+        if (viewMode === 'true') {
+          setIsViewOnly(true);
+          setShowLoginModal(false); // Don't show login modal in view-only mode
+        }
       }
     }
   }, []);
@@ -652,7 +720,7 @@ const App = () => {
   const generateShareableLink = async () => {
     const data = { items, orderNumber };
     const encoded = encodeData(data);
-    const url = `${window.location.origin}${window.location.pathname}?data=${encoded}`;
+    const url = `${window.location.origin}${window.location.pathname}?data=${encoded}&view=true`;
     let copied = false;
     // Try clipboard API
     if (navigator.clipboard && window.isSecureContext) {
@@ -691,10 +759,27 @@ const App = () => {
   const shareImage = async () => {
     const element = document.querySelector('.print-area');
     if (element) {
-      const canvas = await html2canvas(element, {
+      // Create a clone of the element to modify
+      const tempElement = element.cloneNode(true);
+      
+      // Remove any unnecessary elements from the clone
+      const qrSection = tempElement.querySelector('.bg-white.p-3.rounded-lg.border-2.border-dashed.border-red-400.mb-3');
+      if (qrSection) {
+        qrSection.remove();
+      }
+      
+      // Add the temp element to the document (hidden)
+      tempElement.style.position = 'absolute';
+      tempElement.style.left = '-9999px';
+      document.body.appendChild(tempElement);
+      
+      const canvas = await html2canvas(tempElement, {
         backgroundColor: '#ffffff',
         scale: 2
       });
+      
+      // Remove the temp element
+      document.body.removeChild(tempElement);
       
       // Convert canvas to blob
       canvas.toBlob(async (blob) => {
@@ -751,42 +836,80 @@ const App = () => {
     window.print();
   };
 
+  // กล่องกรอก password สำหรับเข้าสู่ระบบ
+  const LoginModal = ({ onLogin }) => {
+  const [password, setPassword] = useState('');
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onLogin(password);
+  };
+
   return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white p-8 rounded-lg shadow-xl max-w-sm mx-4 w-full">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">เข้าสู่ระบบ</h2>
+          <form onSubmit={handleSubmit}>
+            <input
+              type="password"
+              placeholder="กรุณาใส่รหัสผ่าน"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 mb-4 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+            <button
+              type="submit"
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors"
+            >
+              เข้าสู่ระบบ
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
+      {showLoginModal && <LoginModal onLogin={handleLogin} />}
       <div className="container mx-auto px-4 max-w-full">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">ເຄື່ອງມືສ້າງໃບເສັບ</h1>
-          <p className="text-gray-600">ສ້າງໃບເສັບທີ່ສວຍງາມແລະມືອາຊີບ</p>
+          <h1 className="text-4xl font-bold text-gray-800 mb-2">Natniti Store</h1>
+          <p className="text-gray-600">Payments</p>
         </div>
 
-        {/* Tab Navigation */}
-        <div className="flex justify-center mb-8 no-print">
-          <div className="bg-white rounded-lg p-1 shadow-lg">
-            <button
-              onClick={() => setActiveTab('form')}
-              className={`px-6 py-2 rounded-md transition-colors ${
-                activeTab === 'form' 
-                  ? 'bg-blue-500 text-white' 
-                  : 'text-gray-600 hover:text-blue-500'
-              }`}
-            >
-              ແບບຟອມ
-            </button>
-            <button
-              onClick={() => setActiveTab('card')}
-              className={`px-6 py-2 rounded-md transition-colors ${
-                activeTab === 'card' 
-                  ? 'bg-blue-500 text-white' 
-                  : 'text-gray-600 hover:text-blue-500'
-              }`}
-            >
-              ໃບເສັບ
-            </button>
+        {/* Tab Navigation - Hide in view-only mode */}
+        {!isViewOnly && (
+          <div className="flex justify-center mb-8 no-print">
+            <div className="bg-white rounded-lg p-1 shadow-lg">
+              <button
+                onClick={() => setActiveTab('form')}
+                className={`px-6 py-2 rounded-md transition-colors ${
+                  activeTab === 'form' 
+                    ? 'bg-blue-500 text-white' 
+                    : 'text-gray-600 hover:text-blue-500'
+                }`}
+              >
+                ຕັ້ງຄ່າ
+              </button>
+              <button
+                onClick={() => setActiveTab('card')}
+                className={`px-6 py-2 rounded-md transition-colors ${
+                  activeTab === 'card' 
+                    ? 'bg-blue-500 text-white' 
+                    : 'text-gray-600 hover:text-blue-500'
+                }`}
+              >
+                ໃບຊຳລະເງິນ
+              </button>
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="max-w-4xl mx-auto w-full">
-          {activeTab === 'form' ? (
+          {!isViewOnly && activeTab === 'form' ? (
             <div className="w-full">
               <OrderForm 
                 items={items} 
@@ -861,7 +984,7 @@ const App = () => {
   );
 };
 
-// Render app with error reporting: if any runtime error occurs, show an overlay with details
+// ฟังก์ชันแสดง error overlay ถ้าเกิดข้อผิดพลาด
 function showRuntimeErrorOverlay(message, stack) {
   try {
     let overlay = document.getElementById('runtime-error-overlay');
